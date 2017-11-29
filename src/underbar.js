@@ -102,12 +102,33 @@
   _.uniq = function(array, isSorted, iterator) {
     var objects = {};
     var results = [];
-    _.each(array, function(item) {
-      objects[item] = item;
-    });
-    _.each(objects, function(prop) {
-      results.push(objects[prop]);
-    });
+    var iteratorResults = [];
+
+    if (arguments.length < 3) {
+      _.each(array, function(item) {
+        objects[item] = item;
+      });
+      _.each(objects, function(prop) {
+        results.push(objects[prop]);
+      });
+    } else {
+      // for each item in the array
+      _.each(array, function(item) {
+        // apply iterator function to each item
+        // push value to iteratorResults
+        iteratorResults.push(iterator(item));
+      });
+      
+      // iterate through iteratorResults
+      _.each(iteratorResults, function(item) {
+        // if results contains value
+        if (!results.contains(item)) {
+        // else push value
+          results.push(item);
+        }
+      });
+    }
+
     return results;
   };
 
@@ -117,6 +138,13 @@
     // map() is a useful primitive iteration function that works a lot
     // like each(), but in addition to running the operation on all
     // the members, it also maintains an array of results.
+    var results = [];
+
+    _.each(collection, function(item) {
+      results.push(iterator(item));
+    });
+
+    return results;
   };
 
   /*
@@ -158,6 +186,23 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
+    // check arguments
+    if (arguments.length < 3) {
+    // if arguements < 3
+      // accumlator = first item of collection
+      accumulator = collection[0];
+    
+      for (var i = 1; i < collection.length; i++) {
+        accumulator = iterator(accumulator, collection[i]);
+      }
+    } else {
+    // iterate over collection
+      for (var j = 0; j < collection.length; j++) {
+        accumulator = iterator(accumulator, collection[j]); 
+      }
+    }
+  // return the accumulator value
+    return accumulator;
   };
 
   // Determine if the array or object contains a given value (using `===`).
