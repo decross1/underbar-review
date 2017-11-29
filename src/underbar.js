@@ -197,9 +197,9 @@
       }
     } else {
     // iterate over collection
-      for (var j = 0; j < collection.length; j++) {
-        accumulator = iterator(accumulator, collection[j]); 
-      }
+      _.each(collection, function (value) {
+        accumulator = iterator(accumulator, value); 
+      });
     }
   // return the accumulator value
     return accumulator;
@@ -221,12 +221,35 @@
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
+    
+    return _.reduce(collection, function(passed, value) {
+      if (iterator === undefined) {
+        if (value === false) {
+          passed = false;
+        }   
+        return passed;
+      } else {
+        if (!iterator(value)) {
+          passed = false;
+        } 
+        return passed;
+      }
+    }, true);      
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
+    iterator = iterator || _.identity;  
+  
+    for (var i = 0; i < collection.length; i++) {
+      if (iterator(collection[i])) {
+        return true;
+      }
+    }
+    
+    return false;
   };
 
 
@@ -249,11 +272,34 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+    var results = arguments[0];
+
+    for (var i = 1; i < arguments.length; i++) {
+      var curObj = arguments[i];
+      for (var key in curObj) {
+        results[key] = curObj[key];
+      }
+    }
+
+    return results;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+    var results = arguments[0];
+
+    for (var i = 1; i < arguments.length; i++) {
+      var curObj = arguments[i];
+      for (var key in curObj) {
+        if (results[key] === undefined) {
+          results[key] = curObj[key];
+        }
+      }
+    }
+
+    return results;
+    
   };
 
 
@@ -297,6 +343,22 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    var results = {};
+
+    (function () {
+      for (var key in results) {
+        if (results[key]) {
+          return results[key];
+        } else {
+          debugger;
+          results[func] = func.apply(this, arguments);
+          return results[func];
+        }
+      }
+    })();
+    
+   // innerFunction();
+
   };
 
   // Delays a function for the given number of milliseconds, and then calls
